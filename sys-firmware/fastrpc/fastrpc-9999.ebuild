@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/qualcomm/fastrpc"
 EGIT_REPO_URI="https://github.com/qualcomm/fastrpc.git"
 EGIT_BRANCH="development"
 
-KEYWORDS="arm64"
+KEYWORDS="~arm64"
 
 LICENSE="BSD"
 SLOT="0"
@@ -45,6 +45,14 @@ src_install() {
 
 pkg_postinst() {
 	udev_reload
+
+	elog "Remember to configure ADSP_LIBRARY_PATH for adsprpcd_audiopd.service."
+	elog "  /etc/systemd/system/adsprpcd_audiopd.service.d/override.conf"
+	elog ""
+	elog "  [Service]"
+	elog "  Environment=ADSP_LIBRARY_PATH=/lib/firmware/updates/qcom/glymur/ASUSTeK/<MODEL>/ADSP"
+	elog ""
+	elog "Followed by: systemctl daemon-reload"
 }
 
 pkg_postrm() {
