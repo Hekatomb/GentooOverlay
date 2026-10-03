@@ -1,0 +1,123 @@
+diff --git a/ipaplatform/setup.py b/ipaplatform/setup.py
+--- a/ipaplatform/setup.py
++++ b/ipaplatform/setup.py
+@@ -37,6 +37,7 @@ if __name__ == '__main__':
+             "ipaplatform.debian",
+             "ipaplatform.fedora",
+             "ipaplatform.fedora_container",
++            "ipaplatform.gentoo",
+             "ipaplatform.nixos",
+             "ipaplatform.redhat",
+             "ipaplatform.rhel",
+diff --git a/ipaplatform/gentoo/__init__.py b/ipaplatform/gentoo/__init__.py
+new file mode 100644
+--- /dev/null
++++ b/ipaplatform/gentoo/__init__.py
+@@ -0,0 +1,5 @@
++#
++# Gentoo platform support for FreeIPA
++#
++
++"""Gentoo-specific platform support."""
+diff --git a/ipaplatform/gentoo/constants.py b/ipaplatform/gentoo/constants.py
+new file mode 100644
+--- /dev/null
++++ b/ipaplatform/gentoo/constants.py
+@@ -0,0 +1,14 @@
++"""Gentoo platform constants."""
++
++from __future__ import absolute_import
++
++from ipaplatform.base.constants import BaseConstantsNamespace, User, Group
++
++__all__ = ("constants", "User", "Group")
++
++
++class GentooConstantsNamespace(BaseConstantsNamespace):
++    pass
++
++
++constants = GentooConstantsNamespace()
+diff --git a/ipaplatform/gentoo/paths.py b/ipaplatform/gentoo/paths.py
+new file mode 100644
+--- /dev/null
++++ b/ipaplatform/gentoo/paths.py
+@@ -0,0 +1,25 @@
++"""Gentoo filesystem paths."""
++
++from __future__ import absolute_import
++
++from ipaplatform.base.paths import BasePathNamespace
++
++
++class GentooPathNamespace(BasePathNamespace):
++    BIN_HOSTNAMECTL = "/usr/bin/hostnamectl"
++    SYSTEMCTL = "/usr/bin/systemctl"
++
++    CHRONY_CONF = "/etc/chrony/chrony.conf"
++    OPENLDAP_LDAP_CONF = "/etc/openldap/ldap.conf"
++
++    OPENSSL_DIR = "/etc/ssl"
++    OPENSSL_CERTS_DIR = "/etc/ssl/certs"
++    OPENSSL_PRIVATE_DIR = "/etc/ssl/private"
++
++    CA_CERTIFICATES_BUNDLE_PEM = "/usr/local/share/ca-certificates/ipa-ca.crt"
++    CA_CERTIFICATES_DIR = "/usr/local/share/ca-certificates/ipa-ca"
++    IPA_P11_KIT = "/usr/local/share/ca-certificates/ipa.p11-kit"
++    UPDATE_CA_TRUST = "/usr/bin/update-ca-certificates"
++
++
++paths = GentooPathNamespace()
+diff --git a/ipaplatform/gentoo/services.py b/ipaplatform/gentoo/services.py
+new file mode 100644
+--- /dev/null
++++ b/ipaplatform/gentoo/services.py
+@@ -0,0 +1,19 @@
++"""Gentoo-specific systemd service support."""
++
++from __future__ import absolute_import
++
++from ipaplatform.redhat import services as redhat_services
++
++
++def gentoo_service_class_factory(name, api=None):
++    return redhat_services.redhat_service_class_factory(name, api)
++
++
++class GentooServices(redhat_services.RedHatServices):
++    def service_class_factory(self, name, api=None):
++        return gentoo_service_class_factory(name, api)
++
++
++timedate_services = redhat_services.timedate_services
++service = gentoo_service_class_factory
++knownservices = GentooServices()
+diff --git a/ipaplatform/gentoo/tasks.py b/ipaplatform/gentoo/tasks.py
+new file mode 100644
+--- /dev/null
++++ b/ipaplatform/gentoo/tasks.py
+@@ -0,0 +1,24 @@
++"""Gentoo-specific system tasks."""
++
++from __future__ import absolute_import
++
++from ipaplatform.debian.tasks import DebianTaskNamespace
++
++
++class GentooTaskNamespace(DebianTaskNamespace):
++    @staticmethod
++    def restore_pre_ipa_client_configuration(
++            fstore, statestore, was_sssd_installed, was_sssd_configured):
++        # Gentoo pambase owns the PAM configuration. ipa-client-install
++        # therefore has nothing to restore here.
++        return True
++
++    @staticmethod
++    def modify_nsswitch_pam_stack(
++            sssd, mkhomedir, statestore, sudo=True, subid=False):
++        # PAM integration is provided by sys-auth/pambase[sssd].
++        # Do not invoke Debian's pam-auth-update.
++        return True
++
++
++tasks = GentooTaskNamespace()
