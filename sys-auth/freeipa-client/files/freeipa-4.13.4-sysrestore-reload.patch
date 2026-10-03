@@ -1,0 +1,13 @@
+--- a/ipalib/sysrestore.py
++++ b/ipalib/sysrestore.py
+@@ -123,6 +123,10 @@
+         if not os.path.isabs(path):
+             raise ValueError("Absolute path required")
+ 
++        # Multiple FileStore instances may share the same index.
++        # Reload it before modifying the file list.
++        self._load()
++
+         if not os.path.isfile(path):
+             logger.debug("  -> Not backing up - '%s' doesn't exist", path)
+             return

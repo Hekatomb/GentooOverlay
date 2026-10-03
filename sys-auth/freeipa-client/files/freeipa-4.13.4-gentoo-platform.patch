@@ -92,16 +92,32 @@ new file mode 100644
 +timedate_services = redhat_services.timedate_services
 +service = gentoo_service_class_factory
 +knownservices = GentooServices()
+diff --git a/ipaclient/install/client.py b/ipaclient/install/client.py
+--- a/ipaclient/install/client.py
++++ b/ipaclient/install/client.py
+@@ -3923,6 +3923,9 @@ class ClientInstallInterface(hostname_.HostNameInstallInterface,
+                 "removed in a future release."
+             )
+
++        if not self.nisdomain:
++            self.no_nisdomain = True
++
+         if self.no_nisdomain and self.nisdomain:
+             raise RuntimeError(
+                 "--no-nisdomain cannot be used together with --nisdomain")
 diff --git a/ipaplatform/gentoo/tasks.py b/ipaplatform/gentoo/tasks.py
 new file mode 100644
 --- /dev/null
 +++ b/ipaplatform/gentoo/tasks.py
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,33 @@
 +"""Gentoo-specific system tasks."""
 +
 +from __future__ import absolute_import
 +
++from pathlib import Path
++
 +from ipaplatform.debian.tasks import DebianTaskNamespace
++from ipaplatform.paths import paths
 +
 +
 +class GentooTaskNamespace(DebianTaskNamespace):
@@ -118,6 +134,12 @@ new file mode 100644
 +        # PAM integration is provided by sys-auth/pambase[sssd].
 +        # Do not invoke Debian's pam-auth-update.
 +        return True
++
++    def platform_insert_ca_certs(self, ca_certs):
++        Path(paths.CA_CERTIFICATES_DIR).parent.mkdir(
++            mode=0o755, parents=True, exist_ok=True
++        )
++        return super().platform_insert_ca_certs(ca_certs)
 +
 +
 +tasks = GentooTaskNamespace()

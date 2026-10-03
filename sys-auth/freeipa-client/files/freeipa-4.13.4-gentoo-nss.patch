@@ -1,0 +1,61 @@
+--- a/ipaplatform/gentoo/tasks.py
++++ b/ipaplatform/gentoo/tasks.py
+@@ -4,23 +4,50 @@
+ 
+ from pathlib import Path
+ 
++from ipaplatform.base.tasks import BaseTaskNamespace as BaseTask
+ from ipaplatform.debian.tasks import DebianTaskNamespace
+ from ipaplatform.paths import paths
+ 
+ 
+ class GentooTaskNamespace(DebianTaskNamespace):
+-    @staticmethod
+     def restore_pre_ipa_client_configuration(
+-            fstore, statestore, was_sssd_installed, was_sssd_configured):
+-        # Gentoo pambase owns the PAM configuration. ipa-client-install
+-        # therefore has nothing to restore here.
++            self, fstore, statestore,
++            was_sssd_installed, was_sssd_configured):
++        # Gentoo pambase owns the PAM configuration. Only restore NSS.
++        if fstore.has_file(paths.NSSWITCH_CONF):
++            fstore.restore_file(paths.NSSWITCH_CONF)
+         return True
+ 
+-    @staticmethod
+     def modify_nsswitch_pam_stack(
+-            sssd, mkhomedir, statestore, sudo=True, subid=False):
+-        # PAM integration is provided by sys-auth/pambase[sssd].
+-        # Do not invoke Debian's pam-auth-update.
++            self, sssd, mkhomedir, statestore, sudo=True, subid=False):
++        # pylint: disable=ipa-forbidden-import
++        from ipalib import sysrestore
++        # pylint: enable=ipa-forbidden-import
++
++        # Gentoo pambase[sssd] already provides pam_sss and pam_mkhomedir.
++        # Only configure NSS here.
++        fstore = sysrestore.FileStore(paths.IPA_CLIENT_SYSRESTORE)
++
++        BaseTask.configure_nsswitch_database(
++            self, fstore, "group", ["sss"], default_value=["compat"])
++        BaseTask.configure_nsswitch_database(
++            self, fstore, "passwd", ["sss"], default_value=["compat"])
++        BaseTask.configure_nsswitch_database(
++            self, fstore, "shadow", ["sss"], default_value=["compat"])
++        BaseTask.configure_nsswitch_database(
++            self, fstore, "netgroup", ["files", "sss"],
++            preserve=False, default_value=["files", "nis"])
++        BaseTask.configure_nsswitch_database(
++            self, fstore, "automount", ["files", "sss"],
++            preserve=False, default_value=["files", "nis"])
++
++        if sudo:
++            BaseTask.enable_sssd_sudo(self, fstore)
++
++        if subid:
++            BaseTask.configure_nsswitch_database(
++                self, fstore, "subid", ["sss"], default_value=["files"])
++
+         return True
+ 
+     def platform_insert_ca_certs(self, ca_certs):

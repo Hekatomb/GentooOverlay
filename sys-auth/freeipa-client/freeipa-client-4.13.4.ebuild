@@ -43,6 +43,8 @@ DEPEND="
 RDEPEND="
 	${DEPEND}
 	${PYTHON_DEPS}
+	net-misc/curl[kerberos]
+	sys-auth/certmonger
 	app-admin/augeas
 	app-crypt/gnupg
 	dev-libs/nss
@@ -56,15 +58,19 @@ RDEPEND="
 	$(python_gen_cond_dep '
 		dev-python/gssapi[${PYTHON_USEDEP}]
 		dev-python/ifaddr[${PYTHON_USEDEP}]
+		dev-python/netaddr[${PYTHON_USEDEP}]
 		dev-python/python-augeas[${PYTHON_USEDEP}]
-		dev-python/python-ldap[${PYTHON_USEDEP}]
+		dev-python/python-ldap[sasl,${PYTHON_USEDEP}]
 		dev-python/pyasn1[${PYTHON_USEDEP}]
 		dev-python/pyasn1-modules[${PYTHON_USEDEP}]
+		dev-python/qrcode[${PYTHON_USEDEP}]
 	')
 "
 
 PATCHES=(
-	"${FILESDIR}/freeipa-4.13.4-gentoo-platform.patch"
+    "${FILESDIR}/freeipa-4.13.4-gentoo-platform.patch"
+    "${FILESDIR}/freeipa-4.13.4-gentoo-nss.patch"
+    "${FILESDIR}/freeipa-4.13.4-sysrestore-reload.patch"
 )
 
 src_prepare() {
@@ -87,6 +93,8 @@ src_configure() {
 
 src_install() {
 	emake DESTDIR="${D}" PYTHON_INSTALL_EXTRA_OPTIONS="" install
+	keepdir /var/lib/ipa-client/pki
+	keepdir /var/lib/ipa-client/sysrestore
 	python_optimize
 	einstalldocs
 }
