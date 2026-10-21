@@ -17,7 +17,7 @@ LICENSE="GPL-3+"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
 
-IUSE="sudo"
+IUSE="sudo automount"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
@@ -54,6 +54,7 @@ RDEPEND="
 	sys-auth/sssd[python,${PYTHON_SINGLE_USEDEP}]
 	sys-apps/dbus
 	sys-apps/keyutils
+	automount?  ( net-fs/autofs )
 	sudo? ( app-admin/sudo[sssd] )
 	$(python_gen_cond_dep '
 		dev-python/gssapi[${PYTHON_USEDEP}]
@@ -92,6 +93,8 @@ src_configure() {
 }
 
 src_install() {
+	insinto /etc/sysconfig
+	newins /dev/null nfs
 	emake DESTDIR="${D}" PYTHON_INSTALL_EXTRA_OPTIONS="" install
 	keepdir /var/lib/ipa-client/pki
 	keepdir /var/lib/ipa-client/sysrestore
