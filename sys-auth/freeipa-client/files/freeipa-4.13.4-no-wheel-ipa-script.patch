@@ -1,0 +1,14 @@
+--- a/ipaclient/setup.py
++++ b/ipaclient/setup.py
+@@ -49,11 +49,6 @@
+             "qrcode",
+             "six",
+         ],
+-        entry_points={
+-            'console_scripts': [
+-                'ipa = ipaclient.__main__:main'
+-            ]
+-        },
+         extras_require={
+             "install": ["ipaplatform"],
+             "otptoken_yubikey": ["python-yubico", "pyusb"],
