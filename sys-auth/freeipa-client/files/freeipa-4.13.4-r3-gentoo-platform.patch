@@ -34,7 +34,7 @@ new file mode 100644
 +
 +
 +class GentooConstantsNamespace(BaseConstantsNamespace):
-+    pass
++    SECURE_NFS_VAR = None
 +
 +
 +constants = GentooConstantsNamespace()
