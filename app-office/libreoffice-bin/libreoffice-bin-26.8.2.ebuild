@@ -1,4 +1,4 @@
-# Copyright 1999-2026 Gentoo Authors
+# Copyright 1997-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -10,23 +10,18 @@ BASE_SRC_URI="https://download.documentfoundation.org/libreoffice/stable/${PV}/d
 DESCRIPTION="A full office productivity suite. Binary package"
 HOMEPAGE="https://www.libreoffice.org"
 
-SRC_URI_AMD64="
-	${BASE_SRC_URI}/x86_64/LibreOffice_${PV}_Linux_x86-64_deb.tar.gz
-"
-SRC_URI_ARM64="
-        ${BASE_SRC_URI}/aarch64/LibreOffice_${PV}_Linux_aarch64_deb.tar.gz
-"
+SRC_URI_AMD64="${BASE_SRC_URI}/x86_64/LibreOffice_${PV}_Linux_x86-64_deb.tar.gz"
+SRC_URI_ARM64="${BASE_SRC_URI}/aarch64/LibreOffice_${PV}_Linux_aarch64_deb.tar.gz"
 
 SRC_URI="
-	amd64? ( ${SRC_URI_AMD64} )
-        arm64? ( ${SRC_URI_ARM64} )
-
+amd64? ( ${SRC_URI_AMD64} )
+arm64? ( ${SRC_URI_ARM64} )
 "
 S="${WORKDIR}"
 
 LICENSE="LGPL-3"
 SLOT="0"
-KEYWORDS="-* ~amd64 ~arm64"
+KEYWORDS="-* amd64 arm64"
 IUSE="java offlinehelp python"
 
 # "en:en-US" for mapping from Gentoo "en" to upstream "en-US" etc.
@@ -110,7 +105,6 @@ RDEPEND="
 	|| ( x11-misc/xdg-utils kde-plasma/kde-cli-tools )
 	java? ( >=virtual/jre-1.8 )
 "
-RESTRICT="test strip"
 
 QA_PREBUILT="opt/* usr/*"
 
@@ -177,8 +171,10 @@ src_install() {
 
 pkg_postinst() {
 	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
 }
 
 pkg_postrm() {
 	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
 }
