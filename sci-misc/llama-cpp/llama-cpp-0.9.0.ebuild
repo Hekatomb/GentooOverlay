@@ -6,7 +6,7 @@ EAPI=8
 PYTHON_COMPAT=( python3_{13..15} )
 ROCM_VERSION="6.1"
 
-inherit cmake cuda rocm linux-info python-any-r1 toolchain-funcs
+inherit cmake cuda rocm linux-info python-any-r1 toolchain-funcs flag-o-matic
 
 MY_PN="${PN/-/.}"
 TINY_LLAMAS_COMMIT="99dd1a73db5a37100bd4ae633f4cfce6560e1567"
@@ -169,6 +169,7 @@ src_prepare() {
 }
 
 src_configure() {
+	append-cppflags -DNDEBUG
 	local mycmakeargs=(
 		-DLLAMA_BUILD_IS_DEV=${LLAMA_BUILD_IS_DEV}
 		-DLLAMA_BUILD_TESTS=$(usex test)
