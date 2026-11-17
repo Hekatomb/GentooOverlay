@@ -33,7 +33,7 @@ RDEPEND="
 	>=kde-frameworks/qqc2-desktop-style-6.29:6=
 	>=dev-libs/kirigami-addons-1.11:6=
 	>=dev-libs/kirigami-app-components-1.1:6=
-	>=dev-libs/libghostty-vt-1.4
+	>=dev-libs/libghostty-vt-1.0.1
 	kpart? (
 		>=kde-frameworks/kparts-6.29:6=
 		>=kde-frameworks/kxmlgui-6.29:6=
